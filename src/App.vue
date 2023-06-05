@@ -125,13 +125,7 @@ export default defineComponent({
     return {
       store: null,
       input: defaultInput,
-      lists: [
-        { name: 'test', type: 'week1', price: 123 },
-        { name: 'test', type: 'week1', price: 123 },
-        { name: 'test', type: 'week1', price: 123 },
-        { name: 'test', type: 'week1', price: 123 },
-        { name: 'ส่วนลด', type: 'week1', price: -123 },
-      ] as Input[],
+      lists: [] as Input[],
       types: [
         { text: 'Weekly Meal 1st', value: 'week1' },
         { text: 'Weekly Meal 2nd', value: 'week2' },
