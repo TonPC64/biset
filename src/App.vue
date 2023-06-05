@@ -32,11 +32,7 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
           <tr :key="i" v-for="(item, i) in lists" class="hover">
             <td>{{ item.name }}</td>
             <td>
-              <select
-                :id="`item_type_${i}`"
-                v-model="item.type"
-                class="select select-xs w-full max-w-xs mr-4"
-              >
+              <select :id="`item_type_${i}`" v-model="item.type" class="select select-xs w-full max-w-xs mr-4">
                 <option v-for="(t, si) in types" :key="si" :value="t.value">{{ t.text }}</option>
               </select>
             </td>
@@ -54,33 +50,14 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
     <!-- Input -->
     <form id="input" ref="input" @submit="addItem">
       <div class="flex gap-4 w-full px-4">
-        <input
-          id="input_name"
-          ref="input_name"
-          required
-          v-model="input.name"
-          type="text"
-          placeholder="Name"
-          class="input input-bordered w-6/12 max-w-xs"
-        />
-        <select
-          id="input_type"
-          required
-          v-model="input.type"
-          class="select select-bordered max-w-xs text-xs w-3/12"
-        >
+        <input id="input_name" ref="input_name" required v-model="input.name" type="text" placeholder="Name"
+          class="input input-bordered w-6/12 max-w-xs" />
+        <select id="input_type" required v-model="input.type" class="select select-bordered max-w-xs text-xs w-3/12">
           <option disabled :value="null">Select Type</option>
           <option v-for="(t, i) in types" :key="i" :value="t.value">{{ t.text }}</option>
         </select>
-        <input
-          id="input_price"
-          required
-          v-model.number="input.price"
-          step="0.01"
-          type="number"
-          placeholder="Price"
-          class="input input-bordered w-3/12 max-w-xs"
-        />
+        <input id="input_price" required v-model.number="input.price" step="0.01" type="number" placeholder="Price"
+          class="input input-bordered w-3/12 max-w-xs" />
         <button class="btn btn-info h-12 w-12" type="submit">
           <PlusCircleIcon class="w-4" />
         </button>
@@ -146,7 +123,7 @@ export default defineComponent({
   data() {
     return {
       store: null,
-      input: defaultInput,
+      input: Object.assign({}, defaultInput),
       lists: [] as Input[],
       types: [
         { text: 'Weekly Meal 1st', value: 'week1' },
@@ -193,8 +170,7 @@ export default defineComponent({
         return;
       }
       this.lists.push(Object.assign({}, this.input));
-      this.input = Object.assign({}, defaultInput)
-      ;(this.$refs.input as HTMLFormElement).reset();
+      this.input = Object.assign({}, defaultInput);
 
       e.preventDefault();
     },
