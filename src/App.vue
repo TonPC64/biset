@@ -52,7 +52,7 @@ import { useClipboard } from '@vueuse/core';
     <!-- Input -->
     <form id="input" ref="input" @submit="addItem">
       <div class="flex gap-4 w-full px-4">
-        <input id="input_name" ref="input_name" required v-model="input.name" type="text" placeholder="Name"
+        <input id="input_name" autocomplete="off" ref="input_name" required v-model="input.name" type="text" placeholder="Name"
           class="input input-bordered w-6/12 max-w-xs" />
         <select id="input_type" required v-model="input.type" class="select select-bordered max-w-xs text-xs w-3/12">
           <option disabled :value="null">Select Type</option>
