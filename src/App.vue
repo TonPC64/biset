@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
+import { useClipboard } from '@vueuse/core';
+
 </script>
 
 <template>
@@ -8,7 +10,7 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
     <div class="flex justify-between mb-4 mx-4">
       <div class="flex flex-col items-center justify-center">
         <span class="font-bold text-xl">
-          <select id="store" v-model="store" class="select w-full max-w-xs mr-4">
+          <select id="store" v-model="store" ref="store" class="select w-full max-w-xs mr-4" :class="{'select-error': storeValidate}">
             <option disabled selected value="null">Pick Store</option>
             <option v-for="(t, si) in stores" :key="si" :value="t.value">{{ t.text }}</option>
           </select>
@@ -66,7 +68,7 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
 
     <!-- Report -->
     <div class="my-4 flex justify-center" v-if="lists.length > 0">
-      <button class="btn btn-xl btn-accent" @click="report">Report</button>
+      <button class="btn btn-xl btn-accent btn-outline" @click="report">Report & Copy</button>
     </div>
 
     <table class="table table-auto" v-if="showReport">
@@ -87,6 +89,12 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/vue/24/solid';
         </tr>
       </tbody>
     </table>
+
+    <div v-show="showToast" class="toast toast-center">
+      <div class="alert alert-success">
+        <span>Report data is copied</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -124,7 +132,11 @@ export default defineComponent({
     return {
       store: null,
       input: Object.assign({}, defaultInput),
-      lists: [] as Input[],
+      lists: [
+        // mock data
+        // { name: 'foo', type: 'week1', price: 123 },
+        // { name: 'foo', type: 'week2', price: 123 },
+      ] as Input[],
       types: [
         { text: 'Weekly Meal 1st', value: 'week1' },
         { text: 'Weekly Meal 2nd', value: 'week2' },
@@ -152,11 +164,15 @@ export default defineComponent({
         { text: 'Grab', value: 'grab' },
       ] as Option[],
       reportData: {} as ReportGroup,
+      showToast: false,
     };
   },
   computed: {
     showReport(): Boolean {
       return Object.keys(this.reportData).length !== 0;
+    },
+    storeValidate(): Boolean {
+      return this.store === null;
     },
   },
   methods: {
@@ -171,8 +187,9 @@ export default defineComponent({
       }
       this.lists.push(Object.assign({}, this.input));
       this.input = Object.assign({}, defaultInput);
-
       e.preventDefault();
+
+      (this.$refs.input_name as HTMLInputElement).focus();
     },
     removeItem(index: number) {
       this.lists.splice(index, 1);
@@ -181,6 +198,13 @@ export default defineComponent({
       return (p || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 });
     },
     report() {
+      // validate store
+      const storeSelect = this.$refs.store as HTMLSelectElement;
+      if (this.store === null) {
+        storeSelect.focus();
+        return;
+      }
+
       this.reportData = this.lists.reduce((agg: ReportGroup, item: Input) => {
         if (!item.type) return agg;
         if (!item.price) return agg;
@@ -206,6 +230,23 @@ export default defineComponent({
 
         return agg;
       }, {} as ReportGroup);
+
+      // copy data
+      const store = this.optionValue(this.store as string, this.stores);
+      const arr = Object.keys(this.reportData).map((key: string): String[] => {
+        const value = this.reportData[key];
+
+        return [value.value, value.price, this.optionValue(key, this.types), store];
+      });
+      const excelData = arr.map(lines => lines.join('\t')).join('\n');
+      const { copy } = useClipboard();
+
+      copy(excelData).then(() => {
+        this.showToast = true;
+        setTimeout(() => {
+          this.showToast = false;
+        }, 2000);
+      });
     },
     optionValue(k: string, o: Option[]): String {
       const t = o.find((i: Option) => {
